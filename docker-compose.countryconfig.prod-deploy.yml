@@ -20,6 +20,9 @@ services:
     restart: unless-stopped
     secrets:
       - jwt-public-key.{{ts}}
+      - infobip-gateway-endpoint
+      - infobip-api-key
+      - infobip-sender-id
     environment:
       - NODE_ENV=production
       - FHIR_URL=http://hearth:3447/fhir
@@ -28,13 +31,10 @@ services:
       - CONFIRM_REGISTRATION_URL=http://openhim-core:5001/confirm/registration
       - CHECK_INVALID_TOKEN=true
       - HOSTNAME=${HOSTNAME}
-      #- SMS_PROVIDER=
-      #- CLICKATELL_USER_PATH=
-      #- CLICKATELL_PASSWORD_PATH=
-      #- CLICKATELL_API_ID_PATH=
-      #- INFOBIP_GATEWAY_ENDPOINT_PATH=
-      #- INFOBIP_API_KEY_PATH=
-      #- INFOBIP_SENDER_ID_PATH=
+      - SMS_PROVIDER=infobip
+      - INFOBIP_GATEWAY_ENDPOINT_PATH=/run/secrets/infobip-gateway-endpoint
+      - INFOBIP_API_KEY_PATH=/run/secrets/infobip-api-key
+      - INFOBIP_SENDER_ID_PATH=/run/secrets/infobip-sender-id
       - SENTRY_DSN=https://f892d643aab642108f44e2d1795706bc@o309867.ingest.sentry.io/1774604
 
     deploy:
@@ -81,6 +81,14 @@ services:
       - SENTRY_DSN=https://f892d643aab642108f44e2d1795706bc@o309867.ingest.sentry.io/1774604
 
 secrets:
+  infobip-gateway-endpoint:
+    external: true
+  infobip-api-key:
+    external: true
+  infobip-sender-id:
+    external: true
+  jwt-public-key.{{ts}}:
+    external: true
   openhim-user:
     external: true
   openhim-password:
