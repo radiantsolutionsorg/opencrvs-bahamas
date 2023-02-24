@@ -30,7 +30,7 @@ export default async function populateDefaultConfig(ADMIN_LEVELS: number) {
     const birthCertificate = new Certificate({
       svgCode: birthCertificateTemplateDefault,
       svgFilename: 'oCRVS_DefaultZambia_SingleCharacterSet_Birth_v1.svg',
-      user: 'jonathan.campbell',
+      user: 'j.campbell',
       event: 'birth',
       status: 'ACTIVE',
       svgDateUpdated: 1643292458812.0,
@@ -40,7 +40,7 @@ export default async function populateDefaultConfig(ADMIN_LEVELS: number) {
     const deathCertificate = new Certificate({
       svgCode: deathCertificateTemplateDefault,
       svgFilename: 'oCRVS_DefaultZambia_SingleCharacterSet_Death_v1.svg',
-      user: 'jonathan.campbell',
+      user: 'j.campbell',
       event: 'death',
       status: 'ACTIVE',
       svgDateUpdated: 1643292520393.0,
@@ -72,7 +72,7 @@ export default async function populateDefaultConfig(ADMIN_LEVELS: number) {
         }
       },
       EXTERNAL_VALIDATION_WORKQUEUE: false, // For piloting OpenCRVS alongside an existing CR system.  Contact team@opencrvs.org if you wish to use this.  If set to true, OpenCRVS will interrupt all registrations with an API call to an external system, then send this registration to a dedicated queue awaiting asynchronous validation
-      PHONE_NUMBER_PATTERN: '^0(7|9)[0-9]{8}$',
+      PHONE_NUMBER_PATTERN: '^01[0-9]{9}$',
       NID_NUMBER_PATTERN: '^[0-9]{10}$'
     })
 
