@@ -228,6 +228,7 @@
   "config.form.settings.warning",
   "config.form.settings.link",
   "config.form.settings.fetchButton",
+  "config.form.settings.nidVerificationButton",
   "config.form.settings.tel",
   "config.form.settings.selectWithOption",
   "config.form.settings.selectWithDynamicOption",
