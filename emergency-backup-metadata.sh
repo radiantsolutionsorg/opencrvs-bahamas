@@ -25,8 +25,8 @@ print_usage_and_exit () {
     echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
     echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
     echo ""
-    echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
-    echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
+    echo "If your Opensearch is password protected, an admin user's credentials can be given as environment variables:"
+    echo "OPENSEARCH_ADMIN_USER=your_user OPENSEARCH_ADMIN_PASSWORD=your_pass"
     exit 1
 }
 
@@ -65,7 +65,7 @@ REMOTE_DIR=$5
 REPLICAS=$6
 VERSION=$7
 
-# In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
+# In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, OPENSEARCH_ADMIN_USER & OPENSEARCH_ADMIN_PASSWORD database access secrets from a file.
 # We recommend that the secrets are served via a secure API from a Hardware Security Module
 source /data/secrets/opencrvs.secrets
 
@@ -100,11 +100,11 @@ mongo_credentials() {
   fi
 }
 
-elasticsearch_host() {
-  if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
-    echo "$ELASTICSEARCH_ADMIN_USER:$ELASTICSEARCH_ADMIN_PASSWORD@elasticsearch:9200";
+opensearch_host() {
+  if [ ! -z ${OPENSEARCH_ADMIN_USER+x} ] || [ ! -z ${OPENSEARCH_ADMIN_PASSWORD+x} ]; then
+    echo "$OPENSEARCH_ADMIN_USER:$OPENSEARCH_ADMIN_PASSWORD@opensearch:9200";
   else
-    echo "elasticsearch:9200";
+    echo "opensearch:9200";
   fi
 }
 
@@ -127,14 +127,14 @@ docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mo
 docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash \
  -c "mongodump $(mongo_credentials) --host $HOST -d webhooks --gzip --archive=/data/backups/mongo/webhooks-${VERSION:-$BACKUP_DATE}.gz"
 
-# Register backup folder as an Elasticsearch repository for backing up the search data
+# Register backup folder as an Opensearch repository for backing up the search data
 #-------------------------------------------------------------------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/elasticsearch", "compress": true }}'
+docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(opensearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/opensearch", "compress": true }}'
 
 sleep 10
-# Backup Elasticsearch as a set of snapshot files into an elasticsearch sub folder
+# Backup Opensearch as a set of snapshot files into an opensearch sub folder
 #---------------------------------------------------------------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs/snapshot_${VERSION:-$BACKUP_DATE}?wait_for_completion=true&pretty" -d '{ "indices": "ocrvs" }'
+docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(opensearch_host)/_snapshot/ocrvs/snapshot_${VERSION:-$BACKUP_DATE}?wait_for_completion=true&pretty" -d '{ "indices": "ocrvs" }'
 
 # Get the container ID and host details of any running InfluxDB container, as the only way to backup is by using the Influxd CLI inside a running opencrvs_metrics container
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ cd /data/vsexport && tar -zcvf /data/backups/vsexport/ocrvs-${VERSION:-$BACKUP_D
 # Copy the backups to an offsite server in production
 #----------------------------------------------------
 if [[ "$OWN_IP" = "$PRODUCTION_IP" || "$OWN_IP" = "$(dig $PRODUCTION_IP +short)" ]]; then
-  script -q -c "rsync -a -r --progress --rsh='ssh -p$SSH_PORT' /data/backups/elasticsearch/ $SSH_USER@$SSH_HOST:$REMOTE_DIR/elasticsearch" && echo "Copied elasticsearch backup files to remote server."
+  script -q -c "rsync -a -r --progress --rsh='ssh -p$SSH_PORT' /data/backups/opensearch/ $SSH_USER@$SSH_HOST:$REMOTE_DIR/opensearch" && echo "Copied opensearch backup files to remote server."
   script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/minio/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/minio" && echo "Copied minio backup files to remote server."
   script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/influxdb/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/influxdb" && echo "Copied influx backup files to remote server."
   script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/hearth-dev-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied hearth backup files to remote server."
@@ -181,8 +181,8 @@ if [[ "$OWN_IP" = "$PRODUCTION_IP" || "$OWN_IP" = "$(dig $PRODUCTION_IP +short)"
   script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/webhooks-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied webhooks backup files to remote server."
 fi
 
-# Cleanup any old backups from influx or mongo. Keep previous 7 days of data and all elastic data
-# Elastic snapshots require a random selection of files in the data/backups/elasticsearch/indices
+# Cleanup any old backups from influx or mongo. Keep previous 7 days of data and all opensearch data
+# Opensearch snapshots require a random selection of files in the data/backups/opensearch/indices
 # folder
 #------------------------------------------------------------------------------------------------
 find /data/backups/influxdb -mtime +7 -exec rm {} \;

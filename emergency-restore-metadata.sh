@@ -18,14 +18,14 @@ print_usage_and_exit () {
     echo "This script CLEARS ALL DATA and RESTORES'S A SPECIFIC DAY'S or VERSION'S DATA.  This process is irreversable, so USE WITH CAUTION."
     echo "Script must receive a label parameter to restore data from that specific day in format +%Y-%m-%d i.e. 2019-01-01 or that version"
     echo "The Hearth, OpenHIM User and Application-config db backup zips you would like to restore from: hearth-dev-{label}.gz, openhim-dev-{label}.gz, user-mgnt-{label}.gz and  application-config-{label}.gz must exist in /data/backups/mongo/ folder"
-    echo "The Elasticsearch backup folder /data/backups/elasticsearch must exist with all previous snapshots and indices. All files are required"
+    echo "The Opensearch backup folder /data/backups/opensearch must exist with all previous snapshots and indices. All files are required"
     echo "The InfluxDB backup files must exist in the /data/backups/influxdb/{label} folder"
     echo ""
     echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
     echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
     echo ""
-    echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
-    echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
+    echo "If your Opensearch is password protected, an admin user's credentials can be given as environment variables:"
+    echo "OPENSEARCH_ADMIN_USER=your_user OPENSEARCH_ADMIN_PASSWORD=your_pass"
     exit 1
 }
 
@@ -42,7 +42,7 @@ fi
 
 REPLICAS=$2
 
-# In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
+# In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, OPENSEARCH_ADMIN_USER & OPENSEARCH_ADMIN_PASSWORD database access secrets from a file.
 # We recommend that the secrets are served via a secure API from a Hardware Security Module
 source /data/secrets/opencrvs.secrets
 
@@ -95,11 +95,11 @@ mongo_credentials() {
   fi
 }
 
-elasticsearch_host() {
-  if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
-    echo "$ELASTICSEARCH_ADMIN_USER:$ELASTICSEARCH_ADMIN_PASSWORD@elasticsearch:9200";
+opensearch_host() {
+  if [ ! -z ${OPENSEARCH_ADMIN_USER+x} ] || [ ! -z ${OPENSEARCH_ADMIN_PASSWORD+x} ]; then
+    echo "$OPENSEARCH_ADMIN_USER:$OPENSEARCH_ADMIN_PASSWORD@opensearch:9200";
   else
-    echo "elasticsearch:9200";
+    echo "opensearch:9200";
   fi
 }
 
@@ -115,8 +115,8 @@ docker run --rm --network=$NETWORK mongo:4.4 mongo webhooks $(mongo_credentials)
 # Delete all data from search
 #----------------------------
 echo "delete any previously created snapshot if any.  This may error on a fresh install with a repository_missing_exception error.  Just ignore it."
-docker run --rm --network=$NETWORK appropriate/curl curl -X DELETE "http://$(elasticsearch_host)/_snapshot/ocrvs"
-docker run --rm --network=$NETWORK appropriate/curl curl -X DELETE "http://$(elasticsearch_host)/*" -v
+docker run --rm --network=$NETWORK appropriate/curl curl -X DELETE "http://$(opensearch_host)/_snapshot/ocrvs"
+docker run --rm --network=$NETWORK appropriate/curl curl -X DELETE "http://$(opensearch_host)/*" -v
 
 # Delete all data from metrics
 #-----------------------------
@@ -148,15 +148,15 @@ docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mo
 docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash \
  -c "mongorestore $(mongo_credentials) --host $HOST --drop --gzip --archive=/data/backups/mongo/webhooks-$1.gz"
 
-# Register backup folder as an Elasticsearch repository for restoring the search data
+# Register backup folder as an Opensearch repository for restoring the search data
 #-------------------------------------------------------------------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/elasticsearch", "compress": true }}'
+docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(opensearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/opensearch", "compress": true }}'
 
 sleep 10
 # Restore all data from a backup into search
 #-------------------------------------------
 
-docker run --rm --network=$NETWORK appropriate/curl curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs/snapshot_$1/_restore?pretty" -d '{ "indices": "ocrvs" }'
+docker run --rm --network=$NETWORK appropriate/curl curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://$(opensearch_host)/_snapshot/ocrvs/snapshot_$1/_restore?pretty" -d '{ "indices": "ocrvs" }'
 
 # Get the container ID and host details of any running InfluxDB container, as the only way to restore is by using the Influxd CLI inside a running opencrvs_metrics container
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

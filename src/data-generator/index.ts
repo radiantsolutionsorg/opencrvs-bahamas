@@ -156,14 +156,16 @@ async function main() {
 
   log('Got token for system administrator')
   log('Fetching locations')
-  const locations =  await getLocations(localSYSAdminToken)
+  const locations = await getLocations(localSYSAdminToken)
   const facilities = await getFacilities(localSYSAdminToken)
-  const crvsOffices = facilities.filter(({ type }: Location) => type === 'CRVS_OFFICE')
-  
+  const crvsOffices = facilities.filter(
+    ({ type }: Location) => type === 'CRVS_OFFICE'
+  )
+
   const healthFacilities = facilities.filter(
     ({ type }: Facility) => type === 'HEALTH_FACILITY'
   )
-  
+
   log('Found', locations.length, 'locations')
 
   /*
@@ -723,7 +725,7 @@ function birthDeclarationWorkflow(
 
         if (CERTIFY && (!declaredRecently || Math.random() > 0.5)) {
           const registration = await fetchRegistration(randomRegistrar, id)
-          // Wait for few seconds so registration gets updated to elasticsearch before certifying
+          // Wait for few seconds so registration gets updated to opensearch before certifying
           await wait(2000)
           log('Certifying', id)
           await markAsCertified(

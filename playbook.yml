@@ -25,8 +25,8 @@
     content: |
       MONGODB_ADMIN_PASSWORD={{ mongodb_admin_password }}
       MONGODB_ADMIN_USER={{ mongodb_admin_username }}
-      ELASTICSEARCH_ADMIN_PASSWORD={{elasticsearch_superuser_password}}
-      ELASTICSEARCH_ADMIN_USER=elastic
+      OPENSEARCH_ADMIN_PASSWORD={{opensearch_superuser_password}}
+      OPENSEARCH_ADMIN_USER=opensearch
 
 - name: Save disk encryption key into a file as an example (in production use a hardware security module)
   ansible.builtin.copy:
