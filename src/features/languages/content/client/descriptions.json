@@ -737,7 +737,7 @@
     "config.form.settings.warning": "Success notification label for number of addresses settings",
     "config.form.settings.link": "Success notification label for number of addresses settings",
     "config.form.settings.fetchButton": "Success notification label for number of addresses settings",
-    "config.form.settings.nidVerificationButton": "Success notification label for number of addresses settings",
+    "config.form.settings.nidVerificationButton": "Label for the National ID verification field in form configuration",
     "config.form.settings.tel": "Success notification label for number of addresses settings",
     "config.form.settings.selectWithOption": "Success notification label for number of addresses settings",
     "config.form.settings.selectWithDynamicOption": "Success notification label for number of addresses settings",
