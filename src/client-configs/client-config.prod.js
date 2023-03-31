@@ -15,6 +15,7 @@ window.config = {
   LOGIN_URL: 'https://login.{{hostname}}',
   AUTH_URL: 'https://auth.{{hostname}}',
   MINIO_URL: 'https://minio.{{hostname}}',
+  MINIO_BUCKET: 'ocrvs',
   COUNTRY_CONFIG_URL: 'https://countryconfig.{{hostname}}',
   // Country code in uppercase ALPHA-3 format
   COUNTRY: 'FAR',
