@@ -44,6 +44,9 @@ import {
 import { mosipMediatorHandler } from './features/mediators/mosip-openhim-mediator/handler'
 import { ErrorContext } from 'hapi-auth-jwt2'
 
+import * as esbuild from 'esbuild'
+import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
+
 export interface ITokenPayload {
   sub: string
   exp: string
@@ -205,6 +208,51 @@ export async function createServer() {
       auth: false,
       tags: ['api'],
       description: 'Health check endpoint'
+    }
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/MyCustomForm.js',
+    handler: async (request, h) => {
+      const result = await esbuild.build({
+        entryPoints: [__dirname + '/apps/MyCustomForm.tsx'],
+        outfile: './out.js',
+        format: 'esm',
+        bundle: true,
+        plugins: [
+          globalExternals({
+            '@opencrvs/components': {
+              varName: 'OpenCRVSComponents',
+              namedExports: [
+                'InputField',
+                'TextInput',
+                'Button',
+                'Text',
+                'Box',
+                'DateField',
+                'OpenCRVSFormField',
+                'OpenCRVSForm',
+                'OpenCRVSTextField',
+                'useOpenCRVSForm',
+                'OpenCRVSFormSection',
+                'OpenCRVSFormGroup',
+                'OpenCRVSInput'
+              ]
+            },
+            react: 'React'
+          })
+        ]
+      })
+      console.log(result)
+
+      // @ts-ignore
+      return h.file('./out.js')
+    },
+    options: {
+      auth: false,
+      tags: ['api'],
+      description: 'Serves client configuration as a static file'
     }
   })
 
