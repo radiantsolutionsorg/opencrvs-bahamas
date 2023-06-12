@@ -18,7 +18,7 @@ window.config = {
   AVAILABLE_LANGUAGES_SELECT: 'en:English,fr:Français',
   CLIENT_APP_URL: 'https://register.{{hostname}}/',
   COUNTRY_CONFIG_URL: 'https://countryconfig.{{hostname}}',
-  USER_NOTIFICATION_DELIVERY_METHOD: 'sms', // 'email'
+  USER_NOTIFICATION_DELIVERY_METHOD: 'email',
   SENTRY:
     'https://f892d643aab642108f44e2d1795706bc@o309867.ingest.sentry.io/1774604',
   LOGROCKET: ''
