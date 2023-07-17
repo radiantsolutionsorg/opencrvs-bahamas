@@ -39,7 +39,10 @@ import { readFileSync } from 'fs'
 
 const HOME_BIRTH_WEIGHT = 0.2
 const HOME_DEATH_WEIGHT = 0.2
-const NUMBER_OF_ATTACHMENTS_PER_RECORD = 4
+const NUMBER_OF_ATTACHMENTS_PER_RECORD = process.env
+  .NUMBER_OF_ATTACHMENTS_PER_RECORD
+  ? parseInt(process.env.NUMBER_OF_ATTACHMENTS_PER_RECORD, 10)
+  : 2
 
 const ATTACHMENT = readFileSync(
   join(__dirname, 'assets', '528KB-random.png')
