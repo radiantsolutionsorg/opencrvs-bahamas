@@ -16,6 +16,8 @@
 #------------------------------------------------------------------------------------------------------------------
 set -e
 
+WORKING_DIR=$(pwd)
+
 if docker service ls > /dev/null 2>&1; then
   IS_LOCAL=false
 else
@@ -220,16 +222,18 @@ else
 fi
 
 echo "Creating a backup for Minio"
+mkdir -p $ROOT_PATH/backups/minio
 cd $ROOT_PATH/minio && tar -zcvf $ROOT_PATH/backups/minio/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz . && cd /
 
 echo "Creating a backup for Metabase"
+mkdir -p $ROOT_PATH/backups/metabase
 cd $ROOT_PATH/metabase && tar -zcvf $ROOT_PATH/backups/metabase/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz . && cd /
 
 echo "Creating a backup for VSExport"
+mkdir -p $ROOT_PATH/backups/vsexport
 cd $ROOT_PATH/vsexport && tar -zcvf $ROOT_PATH/backups/vsexport/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz . && cd /
 
 if [[ "$IS_LOCAL" = true ]]; then
-  WORKING_DIR=$(pwd)
   echo $WORKING_DIR
   cd $ROOT_PATH/backups && tar -zcvf $WORKING_DIR/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz .
   exit 0
