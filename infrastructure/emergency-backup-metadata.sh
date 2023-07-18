@@ -113,7 +113,12 @@ else
   ROOT_PATH=$(cd "$ROOT_PATH" && pwd)
 fi
 
-
+mkdir -p $ROOT_PATH/backups/elasticsearch
+mkdir -p $ROOT_PATH/backups/influxdb
+mkdir -p $ROOT_PATH/backups/mongo
+mkdir -p $ROOT_PATH/backups/minio
+mkdir -p $ROOT_PATH/backups/metabase
+mkdir -p $ROOT_PATH/backups/vsexport
 
 # Select docker network and replica set in production
 #----------------------------------------------------
