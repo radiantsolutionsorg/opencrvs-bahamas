@@ -136,6 +136,7 @@ elasticsearch_host() {
 # Today's date is used for filenames if VERSION is not provided
 #-----------------------------------
 BACKUP_DATE=$(date +%Y-%m-%d)
+REMOTE_DIR="$REMOTE_DIR/$BACKUP_DATE"
 
 # Backup Hearth, OpenHIM, User, Application-config and any other service related Mongo databases into a mongo sub folder
 #---------------------------------------------------------------------------------------------
@@ -151,6 +152,8 @@ docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mo
   -c "mongodump $(mongo_credentials) --host $HOST -d metrics --gzip --archive=/data/backups/mongo/metrics-${VERSION:-$BACKUP_DATE}.gz"
 docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash \
   -c "mongodump $(mongo_credentials) --host $HOST -d webhooks --gzip --archive=/data/backups/mongo/webhooks-${VERSION:-$BACKUP_DATE}.gz"
+docker run --rm -v /data/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash \
+  -c "mongodump $(mongo_credentials) --host $HOST -d performance --gzip --archive=/data/backups/mongo/performance-${VERSION:-$BACKUP_DATE}.gz"
 
 # Register backup folder as an Elasticsearch repository for backing up the search data
 #-------------------------------------------------------------------------------------
@@ -198,16 +201,18 @@ cd /data/vsexport && tar -zcvf /data/backups/vsexport/ocrvs-${VERSION:-$BACKUP_D
 # Copy the backups to an offsite server in production
 #----------------------------------------------------
 if [[ "$OWN_IP" = "$PRODUCTION_IP" || "$OWN_IP" = "$(dig $PRODUCTION_IP +short)" ]]; then
-  script -q -c "rsync -a -r --progress --rsh='ssh -p$SSH_PORT' /data/backups/elasticsearch/ $SSH_USER@$SSH_HOST:$REMOTE_DIR/elasticsearch" && echo "Copied elasticsearch backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/minio/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/minio" && echo "Copied minio backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/metabase/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/metabase" && echo "Copied Metabase backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/influxdb/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/influxdb" && echo "Copied influx backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/hearth-dev-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied hearth backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/user-mgnt-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied user backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/openhim-dev-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied openhim backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/application-config-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied application-config backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/metrics-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied metrics backup files to remote server."
-  script -q -c "rsync -a -r --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/webhooks-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo" && echo "Copied webhooks backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/elasticsearch/ && rsync' --progress --rsh='ssh -p$SSH_PORT' /data/backups/elasticsearch/ $SSH_USER@$SSH_HOST:$REMOTE_DIR/elasticsearch/" && echo "Copied elasticsearch backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/minio/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/minio/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/minio/" && echo "Copied minio backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/metabase/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/metabase/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/metabase/" && echo "Copied Metabase backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/vsexport/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/vsexport/ocrvs-${VERSION:-$BACKUP_DATE}.tar.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/vsexport/" && echo "Copied VSExport backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/influxdb/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/influxdb/${VERSION:-$BACKUP_DATE} $SSH_USER@$SSH_HOST:$REMOTE_DIR/influxdb/" && echo "Copied influx backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/hearth-dev-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied hearth backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/user-mgnt-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied user backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/openhim-dev-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied openhim backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/application-config-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied application-config backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/metrics-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied metrics backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/webhooks-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied webhooks backup files to remote server."
+  script -q -c "rsync -a -r --rsync-path='mkdir -p $REMOTE_DIR/mongo/ && rsync' --ignore-existing --progress --rsh='ssh -p$SSH_PORT' /data/backups/mongo/performance-${VERSION:-$BACKUP_DATE}.gz $SSH_USER@$SSH_HOST:$REMOTE_DIR/mongo/" && echo "Copied performance backup files to remote server."
 fi
 
 # Cleanup any old backups from influx or mongo. Keep previous 7 days of data and all elastic data
