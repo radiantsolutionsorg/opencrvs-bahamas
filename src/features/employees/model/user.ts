@@ -61,7 +61,7 @@ export interface IUser {
   name: IUserName[]
   username: string
   identifiers?: IIdentifier[]
-  email?: string
+  emailForNotification?: string
   mobile: string
   passwordHash: string
   salt: string
@@ -136,7 +136,7 @@ const userSchema = new Schema(
     name: { type: [UserNameSchema], required: true },
     username: { type: String, required: true },
     identifiers: [IdentifierSchema],
-    email: String,
+    emailForNotification: { type: String, unique: true, sparse: true },
     mobile: { type: String, unique: true },
     passwordHash: { type: String, required: true },
     salt: { type: String, required: true },

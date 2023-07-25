@@ -12,9 +12,9 @@
 import * as Hapi from '@hapi/hapi'
 import * as Joi from 'joi'
 import {
-  SMSTemplateType,
-  sendSMSClickatell,
-  sendSMSInfobip
+  SMSTemplateType
+  // sendSMSClickatell,
+  // sendSMSInfobip
 } from './sms-service'
 import {
   EmailTemplateType,
@@ -22,7 +22,7 @@ import {
   sendEmail
 } from './email-service'
 import {
-  SMS_PROVIDER,
+  // SMS_PROVIDER,
   USER_NOTIFICATION_DELIVERY_METHOD,
   COUNTRY_LOGO_URL,
   LOGIN_URL,
@@ -62,7 +62,7 @@ export async function notificationHandler(
   request: Hapi.Request,
   h: Hapi.ResponseToolkit
 ) {
-  const { templateName, variables, recipient, locale, convertUnicode, type } =
+  const { templateName, variables, recipient, convertUnicode, type } =
     request.payload as NotificationPayload
 
   if (process.env.NODE_ENV !== 'production') {
@@ -99,7 +99,8 @@ export async function notificationHandler(
         recipient.email as string
       )
       break
-    case 'sms':
+    // ignoring the sms portion for email testing
+    /*case 'sms':
       if (SMS_PROVIDER === 'infobip') {
         await sendSMSInfobip(
           templateName.sms as SMSTemplateType,
@@ -116,7 +117,7 @@ export async function notificationHandler(
           convertUnicode
         )
       }
-      break
+      break*/
   }
   return h.response().code(200)
 }

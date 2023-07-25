@@ -377,7 +377,7 @@ export async function createOpenCRVSEmployees(
         }
       ],
       username: practitioner.username,
-      email: practitioner.email,
+      emailForNotification: practitioner.email,
       mobile: convertToMSISDN(practitioner.mobile, countryAlpha3.toUpperCase()),
       passwordHash: pass.hash,
       salt: pass.salt,
