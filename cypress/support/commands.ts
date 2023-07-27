@@ -632,53 +632,43 @@ Cypress.Commands.add('declareDeathDeclarationWithMinimumInput', (options) => {
   cy.get('#select_death_event').click()
   cy.get('#continue').click()
   // EVENT INFO
-  cy.get('#continue').click()
-  // SELECT INFORMANT
-  cy.get('#informantType_SPOUSE').click()
-  cy.goToNextFormSection()
-  // SELECT MAIN CONTACT POINT
-
-  cy.get('#contactPoint_SPOUSE').click()
-  // cy.get('#contactPoint_INFORMANT').click()
-  cy.get('#contactPoint\\.nestedFields\\.registrationPhone').type(
-    '07' + getRandomNumbers(8)
-  )
-  cy.goToNextFormSection()
-  // DECEASED DETAILS
-
-  cy.get('#iD').type('1234567891')
-
+  cy.get('#next_section').click()
+  // INFORMANTS DETAILS
   cy.get('#firstNamesEng').type(options?.deceasedFirstNames || 'Agnes')
   cy.get('#familyNameEng').type(options?.deceasedFamilyName || 'Aktar')
-  cy.get('#birthDate-dd').type('16')
-  cy.get('#birthDate-mm').type('06')
-  cy.get('#birthDate-yyyy').type('1988')
-  cy.selectOption('#gender', 'Male', 'Male')
+  cy.selectOption(
+    '#gender',
+    options?.deceasedGender || 'Male',
+    options?.deceasedGender || 'Male'
+  )
+  cy.get('#deceasedBirthDate-dd').type('16')
+  cy.get('#deceasedBirthDate-mm').type('06')
+  cy.get('#deceasedBirthDate-yyyy').type('1988')
+  cy.selectOption('#nationality', 'Farajaland', 'Farajaland')
   cy.selectOption('#countryPrimary', 'Farajaland', 'Farajaland')
   cy.selectOption('#statePrimary', 'Pualula', 'Pualula')
   cy.selectOption('#districtPrimary', 'Embe', 'Embe')
   cy.goToNextFormSection()
-  // EVENT DETAILS
 
+  // EVENT DETAILS
   cy.get('#deathDate-dd').type('18')
   cy.get('#deathDate-mm').type('01')
   cy.get('#deathDate-yyyy').type('2022')
-
-  // MANNER OF DEATH
   cy.selectOption('#mannerOfDeath', '', 'Natural causes')
   cy.get('#causeOfDeathEstablished').click()
   cy.selectOption('#causeOfDeathMethod', '', 'Physician')
   cy.selectOption('#placeOfDeath', '', "Deceased's usual place of residence")
-
   cy.goToNextFormSection()
-  // Informant details
-  cy.get('#informantID').type('9123456781')
+
+  // INFORMANT DETAILS
+  cy.selectOption('#informantType', '', 'Spouse')
+  cy.get('#firstNamesEng').type('Soumita')
+  cy.get('#familyNameEng').type('Aktar')
   cy.get('#informantBirthDate-dd').type('16')
   cy.get('#informantBirthDate-mm').type('06')
   cy.get('#informantBirthDate-yyyy').type('1988')
-  cy.get('#firstNamesEng').type('Soumita')
-  cy.get('#familyNameEng').type('Aktar')
-
+  cy.get('#primaryAddressSameAsOtherPrimary_true').click()
+  cy.get('#registrationPhone').type('07' + getRandomNumbers(8))
   cy.goToNextFormSection()
 
   // Supporting documents
