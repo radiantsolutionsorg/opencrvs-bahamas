@@ -468,7 +468,7 @@ Cypress.Commands.add('enterMaximumInput', (options) => {
   cy.get('#select_birth_event').click()
   cy.get('#continue').click()
   // EVENT INFO
-  cy.get('#continue').click()
+  cy.get('#next_section').click()
 
   if (
     options?.informantDoB &&
@@ -777,7 +777,7 @@ Cypress.Commands.add('someoneElseJourney', () => {
   cy.get('#select_birth_event').click()
   cy.get('#continue').click()
   // EVENT INFO
-  cy.get('#continue').click()
+  cy.get('#next_section').click()
   // SELECT INFORMANT
   cy.get('#informantType_FATHER').click()
   cy.goToNextFormSection()
