@@ -131,7 +131,6 @@ export const marriageRegisterForms: ISerializedForm = {
           id: 'who-is-applying-view-group',
           title: informantMessageDescriptors.marriageInformantTitle,
           conditionals: [],
-          preventContinueIfError: true,
           showExitButtonOnly: true,
           fields: [
             marriageInformantType,
@@ -215,16 +214,7 @@ export const marriageRegisterForms: ISerializedForm = {
             getNationalID(
               'iD',
               [],
-              [
-                {
-                  operation: 'validIDNumber',
-                  parameters: ['NATIONAL_ID']
-                },
-                {
-                  operation: 'duplicateIDNumber',
-                  parameters: ['bride.iD']
-                }
-              ],
+              getNationalIDValidators('groom'),
               'groomNID'
             ),
             getMarriedLastName
@@ -277,16 +267,7 @@ export const marriageRegisterForms: ISerializedForm = {
             getNationalID(
               'iD',
               [],
-              [
-                {
-                  operation: 'validIDNumber',
-                  parameters: ['NATIONAL_ID']
-                },
-                {
-                  operation: 'duplicateIDNumber',
-                  parameters: ['groom.iD']
-                }
-              ],
+              getNationalIDValidators('bride'),
               'brideNID'
             ),
             getMarriedLastName
