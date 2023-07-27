@@ -719,87 +719,64 @@ Cypress.Commands.add('registerDeathDeclarationWithMaximumInput', () => {
 Cypress.Commands.add('enterDeathMaximumInput', (options) => {
   const deceasedDoBSplit = getDateMonthYearFromString(options?.deceasedDoB)
   const informantDoBSplit = getDateMonthYearFromString(options?.informantDoB)
+
   // DECLARATION FORM
   cy.get('#select_vital_event_view').should('be.visible')
   cy.get('#select_death_event').click()
   cy.get('#continue').click()
-  // EVENT INFO
-  cy.get('#continue').click()
-  // SELECT INFORMANT
-  cy.get('#informantType_SPOUSE').click()
-  cy.goToNextFormSection()
-  // SELECT ADDITIONAL INFORMANT
-  cy.get('#contactPoint_MOTHER').click()
-  // cy.get('#contactPoint\\.nestedFields\\.contactRelationship').type('Colleague')
-  cy.get('#contactPoint\\.nestedFields\\.registrationPhone').type(
-    '07' + getRandomNumbers(8)
-  )
-  cy.goToNextFormSection()
-  // DECEASED DETAILS
-  cy.get('#iD').type('1234567891')
 
-  cy.selectOption('#nationality', 'Farajaland', 'Farajaland')
+  // EVENT INFO
+  cy.get('#next_section').click()
+
+  // DECEASED'S DETAILS
   cy.get('#firstNamesEng').type(options?.deceasedFirstNames || 'Nafiz')
   cy.get('#familyNameEng').type(options?.deceasedFamilyName || 'Sadik')
-  cy.get('#birthDate-dd').type(deceasedDoBSplit?.dd || '16')
-  cy.get('#birthDate-mm').type(deceasedDoBSplit?.mm || '06')
-  cy.get('#birthDate-yyyy').type(deceasedDoBSplit?.yyyy || '1971')
-
   cy.selectOption(
     '#gender',
     options?.deceasedGender || 'Male',
     options?.deceasedGender || 'Male'
   )
-  cy.selectOption('#maritalStatus', 'Married', 'Married')
-
+  cy.get('#deceasedBirthDate-dd').type(deceasedDoBSplit?.dd || '16')
+  cy.get('#deceasedBirthDate-mm').type(deceasedDoBSplit?.mm || '06')
+  cy.get('#deceasedBirthDate-yyyy').type(deceasedDoBSplit?.yyyy || '1971')
+  cy.selectOption('#nationality', 'Farajaland', 'Farajaland')
+  cy.get('#deceasedID').type('1234567891')
   cy.selectOption('#countryPrimary', 'Farajaland', 'Farajaland')
   cy.selectOption('#statePrimary', 'Pualula', 'Pualula')
   cy.selectOption('#districtPrimary', 'Embe', 'Embe')
   cy.get('#addressLine3UrbanOptionPrimary').type('My residential area')
   cy.get('#addressLine2UrbanOptionPrimary').type('My street')
   cy.get('#numberUrbanOptionPrimary').type('40')
+  cy.get('#postcodePrimary').type('12345')
   cy.goToNextFormSection()
+
   // EVENT DETAILS
   cy.get('#deathDate-dd').type('18')
   cy.get('#deathDate-mm').type('01')
   cy.get('#deathDate-yyyy').type('2019')
-
-  // CAUSE OF DEATH DETAILS
   cy.selectOption('#mannerOfDeath', '', 'Homicide')
   cy.get('#causeOfDeathEstablished').click()
   cy.selectOption('#causeOfDeathMethod', '', 'Physician')
   cy.selectOption('#placeOfDeath', '', 'Other')
-
-  cy.selectOption('#country', 'Farajaland', 'Farajaland')
-  cy.selectOption(
-    '#state',
-    options?.eventLocationLevel1 || 'Pualula',
-    options?.eventLocationLevel1 || 'Pualula'
-  )
-  cy.selectOption(
-    '#district',
-    options?.eventLocationLevel2 || 'Embe',
-    options?.eventLocationLevel2 || 'Embe'
-  )
   cy.get('#cityUrbanOption').type('My city')
   cy.get('#addressLine3UrbanOption').type('My residential area')
   cy.get('#addressLine2UrbanOption').type('My street')
   cy.get('#numberUrbanOption').type('40')
-
+  cy.get('#postalCode').type('12345')
   cy.goToNextFormSection()
+
   // INFORMANT DETAILS
-  cy.selectOption('#nationality', 'Farajaland', 'Farajaland')
-  cy.get('#informantID').type('9123453781')
+  cy.selectOption('#informantType', '', 'Spouse')
+  cy.get('#firstNamesEng').type(options?.informantFirstNames || 'Anne')
+  cy.get('#familyNameEng').type(options?.informantFamilyName || 'Salim')
   cy.get('#informantBirthDate-dd').type(informantDoBSplit?.dd || '16')
   cy.get('#informantBirthDate-mm').type(informantDoBSplit?.mm || '06')
   cy.get('#informantBirthDate-yyyy').type(informantDoBSplit?.yyyy || '1988')
-  cy.get('#firstNamesEng').type(options?.informantFirstNames || 'Anne')
-  cy.get('#familyNameEng').type(options?.informantFamilyName || 'Salim')
+  cy.selectOption('#nationality', 'Farajaland', 'Farajaland')
+  cy.get('#informantID').type('9123453781')
   cy.get('#primaryAddressSameAsOtherPrimary_false').click()
-
-  cy.selectOption('#countryPrimary', 'Farajaland', 'Farajaland')
-  cy.selectOption('#statePrimary', 'Pualula', 'Pualula')
-  cy.selectOption('#districtPrimary', 'Embe', 'Embe')
+  cy.get('#registrationPhone').type('07' + getRandomNumbers(8))
+  cy.get('#registrationEmail').type('anne.salim@opencrvs.org')
   cy.goToNextFormSection()
   cy.goToNextFormSection()
 })
