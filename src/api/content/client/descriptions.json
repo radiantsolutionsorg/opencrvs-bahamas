@@ -64,6 +64,7 @@
     "buttons.copy": "Copy button text",
     "buttons.copied": "Copied button text",
     "buttons.exactDateUnknown": "Label for DateRangePickerForFormField components daterangepicker toggle button",
+    "constants.notActive": "Label for inactive feature",
     "constants.countryName": "Name of the OpenCRVS implementation country",
     "constants.address": "Label for address",
     "constants.allEvents": "Label for select option All events",
