@@ -58,12 +58,25 @@ import {
   witnessTwoNameInEnglish
 } from '../common/preview-groups'
 import { certificateHandlebars } from './certificate-handlebars'
+import { getCommonSectionMapping } from '@countryconfig/utils/mapping/field-mapping-utils'
+
+// import { createCustomFieldExample } from '../custom-fields'
 
 // ======================= FORM CONFIGURATION =======================
 
 // A REGISTRATION FORM IS MADE UP OF PAGES OR "SECTIONS"
 
-// A "SECTION" CAN BE SPLIT OVER MULTIPLE PAGES USING "GROUPS" ALTHOUGH THIS MAY BE DEPRECATED
+// A "SECTION" CAN BE SPLIT OVER MULTIPLE SUB-PAGES USING "GROUPS"
+
+// GROUPS CONTAIN A FIELDS ARRAY AND EACH FIELD IS RENDERED BY A FORM FIELD FUNCTION
+
+// MOVE FORM FIELD FUNCTIONS UP AND DOWN TO CHANGE THE VERTICAL ORDER OF FIELDS
+
+// IN EACH GROUP, REQUIRED FIELDS MUST BE INCLUDED AS-IS FOR OPENCRVS TO FUNCTION
+
+// OPTIONAL FIELDS CAN BE COMMENTED OUT OR REMOVED IF NOT REQUIRED
+
+// DUPLICATE & FOLLOW THE INSTRUCTIONS IN THE createCustomFieldExample FUNCTION WHEN REQUIRED FOR ADDING NEW CUSTOM FIELDS
 
 export const marriageForm: ISerializedForm = {
   sections: [
@@ -78,7 +91,6 @@ export const marriageForm: ISerializedForm = {
           id: 'who-is-applying-view-group',
           title: informantMessageDescriptors.marriageInformantTitle,
           conditionals: [],
-          showExitButtonOnly: true,
           fields: [
             marriageInformantType,
             otherInformantType(Event.Marriage), // Required field
@@ -94,7 +106,12 @@ export const marriageForm: ISerializedForm = {
             ), // Required field
             getBirthDate(
               'informantBirthDate',
-              hideIfInformantBrideOrGroom,
+              hideIfInformantBrideOrGroom.concat([
+                {
+                  action: 'hide',
+                  expression: 'values.exactDateOfBirthUnknown'
+                }
+              ]),
               [
                 {
                   operation: 'dateFormatIsCorrect',
@@ -107,7 +124,7 @@ export const marriageForm: ISerializedForm = {
               ],
               certificateHandlebars.informantBirthDate
             ), // Required field
-            exactDateOfBirthUnknown,
+            exactDateOfBirthUnknown(hideIfInformantBrideOrGroom),
             getAgeOfIndividualInYears(
               formMessageDescriptors.ageOfInformant,
               exactDateOfBirthUnknownConditional.concat(
@@ -130,14 +147,7 @@ export const marriageForm: ISerializedForm = {
           previewGroups: [informantNameInEnglish]
         }
       ],
-      mapping: {
-        mutation: {
-          operation: 'setInformantSectionTransformer'
-        },
-        query: {
-          operation: 'getInformantSectionTransformer'
-        }
-      }
+      mapping: getCommonSectionMapping('informant')
     },
     {
       id: 'groom',
@@ -160,11 +170,16 @@ export const marriageForm: ISerializedForm = {
             ), // Required field
             getBirthDate(
               'groomBirthDate',
-              [],
+              [
+                {
+                  action: 'hide',
+                  expression: 'values.exactDateOfBirthUnknown'
+                }
+              ],
               brideOrGroomBirthDateValidators('groom'),
               certificateHandlebars.groomBirthDate
             ), // Required field
-            exactDateOfBirthUnknown,
+            exactDateOfBirthUnknown([]),
             getAgeOfIndividualInYears(
               formMessageDescriptors.ageOfGroom,
               exactDateOfBirthUnknownConditional
@@ -203,11 +218,16 @@ export const marriageForm: ISerializedForm = {
             ), // Required field
             getBirthDate(
               'brideBirthDate',
-              [],
+              [
+                {
+                  action: 'hide',
+                  expression: 'values.exactDateOfBirthUnknown'
+                }
+              ],
               brideOrGroomBirthDateValidators('bride'),
               certificateHandlebars.brideBirthDate
             ), // Required field
-            exactDateOfBirthUnknown,
+            exactDateOfBirthUnknown([]),
             getAgeOfIndividualInYears(formMessageDescriptors.ageOfBride, [
               {
                 action: 'hide',
@@ -269,14 +289,7 @@ export const marriageForm: ISerializedForm = {
           previewGroups: [witnessOneNameInEnglish]
         }
       ],
-      mapping: {
-        mutation: {
-          operation: 'setInformantSectionTransformer'
-        },
-        query: {
-          operation: 'getInformantSectionTransformer'
-        }
-      }
+      mapping: getCommonSectionMapping('informant')
     },
     {
       id: 'witnessTwo',
@@ -303,14 +316,7 @@ export const marriageForm: ISerializedForm = {
           previewGroups: [witnessTwoNameInEnglish]
         }
       ],
-      mapping: {
-        mutation: {
-          operation: 'setInformantSectionTransformer'
-        },
-        query: {
-          operation: 'getInformantSectionTransformer'
-        }
-      }
+      mapping: getCommonSectionMapping('informant')
     },
     documentsSection
   ]

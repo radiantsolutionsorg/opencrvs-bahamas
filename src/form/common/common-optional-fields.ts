@@ -15,8 +15,18 @@ import { SerializedFormField, Conditional } from '../types/types'
 import { Validator } from '../types/validators'
 import { maritalStatusOptions } from './select-options'
 import { certificateHandlebars } from '../birth/certificate-handlebars'
+import { getFieldMapping } from '@countryconfig/utils/mapping/field-mapping-utils'
 
-export const exactDateOfBirthUnknown: SerializedFormField = {
+const exactDobConditional: Conditional[] = [
+  {
+    action: 'hide',
+    expression: '!window.config.DATE_OF_BIRTH_UNKNOWN'
+  }
+]
+
+export const exactDateOfBirthUnknown = (
+  conditionalCase: Conditional[]
+): SerializedFormField => ({
   name: 'exactDateOfBirthUnknown',
   type: 'CHECKBOX',
   label: {
@@ -28,26 +38,8 @@ export const exactDateOfBirthUnknown: SerializedFormField = {
   required: false,
   hideHeader: true,
   initialValue: false,
-  validator: [
-    {
-      operation: 'range',
-      parameters: [12, 120]
-    },
-    {
-      operation: 'maxLength',
-      parameters: [3]
-    },
-    {
-      operation: 'isValidParentsBirthDate',
-      parameters: [5, true]
-    }
-  ],
-  conditionals: [
-    {
-      action: 'hide',
-      expression: '!window.config.DATE_OF_BIRTH_UNKNOWN || !values.detailsExist'
-    }
-  ],
+  validator: [],
+  conditionals: exactDobConditional.concat(conditionalCase),
   mapping: {
     query: {
       operation: 'booleanTransformer'
@@ -56,7 +48,7 @@ export const exactDateOfBirthUnknown: SerializedFormField = {
       operation: 'ignoreFieldTransformer'
     }
   }
-}
+})
 
 export const getNationalID = (
   fieldName: string,
@@ -72,21 +64,7 @@ export const getNationalID = (
     initialValue: '',
     validator,
     conditionals,
-    mapping: {
-      template: {
-        fieldName: certificateHandlebar,
-        operation: 'identityToFieldTransformer',
-        parameters: ['id', 'NATIONAL_ID']
-      },
-      mutation: {
-        operation: 'fieldToIdentityTransformer',
-        parameters: ['id', 'NATIONAL_ID']
-      },
-      query: {
-        operation: 'identityToFieldTransformer',
-        parameters: ['id', 'NATIONAL_ID']
-      }
-    }
+    mapping: getFieldMapping('nationalId', certificateHandlebar)
   } satisfies SerializedFormField)
 
 export const getAgeOfIndividualInYears = (
@@ -132,19 +110,14 @@ export const getMaritalStatus = (
   initialValue: '',
   validator: [],
   placeholder: formMessageDescriptors.formSelectPlaceholder,
-  mapping: {
-    template: {
-      fieldName: certificateHandlebar,
-      operation: 'selectTransformer'
-    }
-  },
+  mapping: getFieldMapping('maritalStatus', certificateHandlebar),
   conditionals,
   options: maritalStatusOptions
 })
 
 export const registrationEmail: SerializedFormField = {
   name: 'registrationEmail',
-  type: 'TEL',
+  type: 'TEXT',
   label: formMessageDescriptors.email,
   required: true, // Email is the configured INFORMANT_NOTIFICATION_DELIVERY_METHOD in Farajaland
   initialValue: '',
@@ -154,20 +127,10 @@ export const registrationEmail: SerializedFormField = {
     }
   ],
   conditionals: [],
-  mapping: {
-    mutation: {
-      operation: 'sectionFieldToBundleFieldTransformer',
-      parameters: ['registration.contactEmail']
-    },
-    query: {
-      operation: 'fieldValueSectionExchangeTransformer',
-      parameters: ['registration', 'contactEmail']
-    },
-    template: {
-      fieldName: certificateHandlebars.contactEmail,
-      operation: 'plainInputTransformer'
-    }
-  }
+  mapping: getFieldMapping(
+    'registrationEmail',
+    certificateHandlebars.contactEmail
+  )
 }
 
 export const registrationPhone: SerializedFormField = {
@@ -182,33 +145,10 @@ export const registrationPhone: SerializedFormField = {
     }
   ],
   conditionals: [],
-  mapping: {
-    mutation: {
-      operation: 'sectionFieldToBundleFieldTransformer',
-      parameters: [
-        'registration.contactPhoneNumber',
-        {
-          operation: 'msisdnTransformer',
-          parameters: ['registration.contactPhoneNumber']
-        }
-      ]
-    },
-    query: {
-      operation: 'fieldValueSectionExchangeTransformer',
-      parameters: [
-        'registration',
-        'contactPhoneNumber',
-        {
-          operation: 'localPhoneTransformer',
-          parameters: ['registration.contactPhoneNumber']
-        }
-      ]
-    },
-    template: {
-      fieldName: certificateHandlebars.contactPhoneNumber,
-      operation: 'selectTransformer'
-    }
-  }
+  mapping: getFieldMapping(
+    'registrationPhone',
+    certificateHandlebars.contactPhoneNumber
+  )
 }
 
 export const divider = (
@@ -226,4 +166,23 @@ export const divider = (
   ignoreBottomMargin: true,
   validator: [],
   conditionals
+})
+
+// This optional field is used to validate user input with an externally integrated national ID system
+export const getNIDVerificationButton = (
+  fieldName: string,
+  conditionals: Conditional[],
+  validator: any[]
+): SerializedFormField => ({
+  name: fieldName,
+  type: 'NID_VERIFICATION_BUTTON',
+  label: formMessageDescriptors.iDTypeNationalID,
+  required: true,
+  initialValue: '',
+  validator,
+  conditionals,
+  mapping: getFieldMapping('nationalIdVerification'),
+  labelForVerified: formMessageDescriptors.nidVerified,
+  labelForUnverified: formMessageDescriptors.nidNotVerified,
+  labelForOffline: formMessageDescriptors.nidOffline
 })
