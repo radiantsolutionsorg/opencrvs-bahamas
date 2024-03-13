@@ -11,9 +11,9 @@ all:
     users:
       # @todo this is where you define which development team members have access to the server.
       # If you need to remove access from someone, do not remove them from this list, but instead set their state: absent
-      - name: my-user
+      - name: provision
         ssh_keys:
-          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABg...Z/rhU= user@example.com
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmSfmCQ2NTkbLbWqKgXrPkj1LeuWuITjvkFJfv492aso9BOZ+03w5kVraFaQSL4Cox2KVQRAi326C+G8yGuU3OLq8r/LszzcfOkevXXB0QrjS4xLBoBe1uEt0JzzHH90XZ+dgL6Ms6ftBEwcnMO//TwAJDigJ1pCDL65RpRho0K77JkJEQSHfSGT1iSATetms+yzJUBQxHpvQRooa92Mqcj0+po/MOnrOno36elUlozPkX7J7CGt4mmRvGr8wFtiO9jyXtQHaoHoGpDR6JNYMbcADul81LjJhkA5OlRznoceu2A5EqEu6d/Ss43kOSE4Jk1E5vcjCu0VV6GuM+RdSN8yvzGY2TDVaj9vQhkEX0JZTHoa7CSE2nRvsLHZ3qWvxi4ru3xpNGaAnUvo4stGvUP7ZvudEbiM3uldM4SFPlvrrFT3+sYlsRM1FOXSXJVrAddZAxv23d2JcuLDUxzILRTXPO4yZkkWBYuzqA1gVmEusqaCRLF4GCChSywwUssik= provision@ip-172-31-43-222
         state: present
         sudoer: true
 
@@ -31,7 +31,7 @@ all:
 docker-manager-first:
   hosts:
     qa: # @todo set this to be the hostname of your target server
-      ansible_host: '55.55.55.55' # @todo set this to be the IP address of your server
+      ansible_host: '34.212.149.22' # @todo set this to be the IP address of your server
       data_label: data1 # for manager machines, this should always be "data1"
 
 # QA and staging servers are not configured to use workers.

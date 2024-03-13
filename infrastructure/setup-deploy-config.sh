@@ -27,7 +27,7 @@ KIBANA_ENCRYPTION_KEY=`uuidgen`
 sed -i "s/{{KIBANA_ENCRYPTION_KEY}}/$KIBANA_ENCRYPTION_KEY/g" /opt/opencrvs/infrastructure/monitoring/kibana/kibana.yml
 
 # Move metabase file
-mv /opt/opencrvs/infrastructure/metabase/metabase.init.db.sql /data/metabase/metabase.init.db.sql
+mv /opt/opencrvs/infrastructure/metabase.init.db.sql /data/metabase/metabase.init.db.sql
 
 # Replace environment variables from all alert definition files
 for file in /opt/opencrvs/infrastructure/monitoring/elastalert/rules/*.yaml; do
